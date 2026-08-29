@@ -1,0 +1,26 @@
+{
+	"schemaVersion": 1,
+	"id": "herobrine",
+	"version": "${version}",
+	"name": "Herobrine",
+	"description": "He appears at night, at a distance, and is gone the moment you look too long.",
+	"authors": [
+		"Elduin"
+	],
+	"license": "CC0-1.0",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"dev.herobrine.HerobrineMod"
+		],
+		"client": [
+			"dev.herobrine.client.HerobrineModClient"
+		]
+	},
+	"depends": {
+		"fabricloader": ">=0.19.3",
+		"minecraft": "~1.21",
+		"java": ">=21",
+		"fabric-api": "*"
+	}
+}
