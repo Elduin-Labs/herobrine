@@ -8,12 +8,14 @@ import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRe
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.Heightmap;
 
@@ -22,13 +24,16 @@ public class HerobrineMod implements ModInitializer {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
+	private static final ResourceKey<EntityType<?>> HEROBRINE_KEY =
+		ResourceKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(MOD_ID, "herobrine"));
+
 	public static final EntityType<HerobrineEntity> HEROBRINE = Registry.register(
 		BuiltInRegistries.ENTITY_TYPE,
-		ResourceLocation.fromNamespaceAndPath(MOD_ID, "herobrine"),
+		HEROBRINE_KEY,
 		EntityType.Builder.of(HerobrineEntity::new, MobCategory.MONSTER)
 			.sized(0.6F, 1.8F)
 			.clientTrackingRange(16)
-			.build("herobrine")
+			.build(HEROBRINE_KEY)
 	);
 
 	/** How often the game rolls for a sighting, in ticks. */
@@ -50,12 +55,12 @@ public class HerobrineMod implements ModInitializer {
 			}
 
 			for (ServerLevel level : server.getAllLevels()) {
-				if (level.dimension() != Level.OVERWORLD || !level.isNight()) {
+				if (level.dimension() != Level.OVERWORLD || !level.isDarkOutside()) {
 					continue;
 				}
 
 				for (ServerPlayer player : level.players()) {
-					if (level.random.nextFloat() < SIGHTING_CHANCE) {
+					if (level.getRandom().nextFloat() < SIGHTING_CHANCE) {
 						trySpawnNear(level, player);
 					}
 				}
@@ -70,12 +75,12 @@ public class HerobrineMod implements ModInitializer {
 		}
 
 		for (int attempt = 0; attempt < 20; attempt++) {
-			double angle = level.random.nextDouble() * Math.PI * 2.0;
-			double distance = MIN_DISTANCE + level.random.nextDouble() * (MAX_DISTANCE - MIN_DISTANCE);
+			double angle = level.getRandom().nextDouble() * Math.PI * 2.0;
+			double distance = MIN_DISTANCE + level.getRandom().nextDouble() * (MAX_DISTANCE - MIN_DISTANCE);
 			int x = (int)(player.getX() + Math.cos(angle) * distance);
 			int z = (int)(player.getZ() + Math.sin(angle) * distance);
 
-			if (!level.isLoaded(new BlockPos(x, level.getMinBuildHeight() + 1, z))) {
+			if (!level.isLoaded(new BlockPos(x, level.getMinY() + 1, z))) {
 				continue;
 			}
 
@@ -89,14 +94,14 @@ public class HerobrineMod implements ModInitializer {
 				continue;
 			}
 
-			HerobrineEntity herobrine = HEROBRINE.create(level);
+			HerobrineEntity herobrine = HEROBRINE.create(level, EntitySpawnReason.EVENT);
 			if (herobrine == null) {
 				return;
 			}
 
-			herobrine.moveTo(ground.getX() + 0.5, ground.getY(), ground.getZ() + 0.5, 0.0F, 0.0F);
+			herobrine.snapTo(ground.getX() + 0.5, ground.getY(), ground.getZ() + 0.5);
 			herobrine.lookAt(net.minecraft.commands.arguments.EntityAnchorArgument.Anchor.EYES, player.position());
-			herobrine.finalizeSpawn(level, level.getCurrentDifficultyAt(ground), MobSpawnType.EVENT, null);
+			herobrine.finalizeSpawn(level, level.getCurrentDifficultyAt(ground), EntitySpawnReason.EVENT, null);
 			level.addFreshEntity(herobrine);
 			LOGGER.info("Sighting near {} at {} ({} blocks away)", player.getName().getString(), ground, (int)Math.sqrt(player.distanceToSqr(herobrine)));
 			return;

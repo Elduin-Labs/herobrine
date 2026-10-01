@@ -51,11 +51,9 @@ public class HerobrineEntity extends PathfinderMob {
 	}
 
 	@Override
-	public boolean hurt(DamageSource source, float amount) {
+	public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
 		// You cannot fight him. Attacking just makes him leave.
-		if (this.level() instanceof ServerLevel serverLevel) {
-			this.vanish(serverLevel);
-		}
+		this.vanish(level);
 		return false;
 	}
 

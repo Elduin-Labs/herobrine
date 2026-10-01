@@ -1,9 +1,11 @@
-# Example Mod
+# Herobrine
 
-## Setup
+He appears at night, at a distance, and is gone the moment you look too long.
 
-For setup instructions, please see the [Fabric Documentation page](https://docs.fabricmc.net/develop/getting-started/creating-a-project#setting-up) related to the IDE that you are using.
+Walk toward him and he vanishes. Hit him and he vanishes. Stare at him and he
+vanishes. You never get close.
 
-## License
+Fabric, for Minecraft 1.21.11. Needs Fabric API. Put it on the server and in
+your game.
 
-This template is available under the CC0 license. Feel free to learn from it and incorporate it in your own projects.
+Made by Elduin, with Claude.
